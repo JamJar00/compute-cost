@@ -7,3 +7,10 @@ At some point I'll have this hosted on the internet. For now, run it locally wit
 npm install
 npm run dev -- --open
 ```
+
+## TODO
+- Consider AWS Free Tier in costs
+- Add EC2 somehow (EC2 scales linearly vertically so can just consider bottom tier and a few different types?)
+- Automatically update costs from the AWS API
+- Add learn more section
+- Add tips for each compute type
