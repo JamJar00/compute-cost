@@ -1,38 +1,9 @@
-# sv
+# Compute Cost
+This is a WIP project to show the costs of different AWS compute types in pretty graphs and demonstrate how their cost changes as each scales up. Hopefully it will help people choose the right option for their project and understand the limitations of each
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
+## Development
+At some point I'll have this hosted on the internet. For now, run it locally with:
+```bash
+npm install
 npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
