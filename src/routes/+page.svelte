@@ -22,10 +22,16 @@
     return (Math.ceil(mem / 1024) * 0.00167115 + Math.ceil(rps / rpsCpu) * 0.01521889) * 730;
   }
 
+  function estimateEc2Cost(rps, rpsCpu) {
+    // c5.large instances have two CPUs so we double rpsCpu
+    return Math.ceil(rps / (rpsCpu * 2)) * 0.101 * 730
+  }
+
   let rps = $state(10), mem = $state(1024), time = $state(100), rpsCpu = $state(10);
   let lambdaCost = $derived(estimateLambdaCost(rps, mem, time));
   let fargateCost = $derived(estimateFargateCost(rps, mem, rpsCpu));
   let fargateSpotCost = $derived(estimateFargateSpotCost(rps, mem, rpsCpu));
+  let ec2Cost = $derived(estimateEc2Cost(rps, rpsCpu));
 
   let canvas;
   let chart;
@@ -57,6 +63,7 @@
       { name: "Lambda", cost: lambdaCost },
       { name: "Fargate (On Demand)", cost: fargateCost },
       { name: "Fargate (Spot)", cost: fargateSpotCost },
+      { name: "EC2 (On Demand, C5 Instances)", cost: ec2Cost },
     ];
 
     chart.data = {
@@ -108,6 +115,7 @@
     const lambdaChartData = steps.map(s => ({ rps: rps * s, cost: estimateLambdaCost(rps * s, mem, time) }));
     const fargateChartData = steps.map(s => ({ rps: rps * s, cost: estimateFargateCost(rps * s, mem, rpsCpu) }));
     const fargateSpotChartData = steps.map(s => ({ rps: rps * s, cost: estimateFargateSpotCost(rps * s, mem, rpsCpu) }));
+    const ec2ChartData = steps.map(s => ({ rps: rps * s, cost: estimateEc2Cost(rps * s, rpsCpu) }));
 
     scalingChart.data = {
       labels: lambdaChartData.map(row => row.rps),
@@ -125,6 +133,11 @@
           label: 'Fargate (Spot)',
           stepped: 'after',
           data: fargateSpotChartData.map(row => row.cost)
+        },
+        {
+          label: 'EC2 (On Demand, C5 Instances)',
+          stepped: 'after',
+          data: ec2ChartData.map(row => row.cost)
         }
       ]
     };
