@@ -27,11 +27,17 @@
     return Math.ceil(rps / (rpsCpu * 2)) * 0.101 * 730
   }
 
+  function estimateEc2SpotCost(rps, rpsCpu) {
+    // c5.large instances have two CPUs so we double rpsCpu
+    return Math.ceil(rps / (rpsCpu * 2)) * 0.0276 * 730
+  }
+
   let rps = $state(10), mem = $state(1024), time = $state(100), rpsCpu = $state(10);
   let lambdaCost = $derived(estimateLambdaCost(rps, mem, time));
   let fargateCost = $derived(estimateFargateCost(rps, mem, rpsCpu));
   let fargateSpotCost = $derived(estimateFargateSpotCost(rps, mem, rpsCpu));
   let ec2Cost = $derived(estimateEc2Cost(rps, rpsCpu));
+  let ec2SpotCost = $derived(estimateEc2SpotCost(rps, rpsCpu));
 
   let canvas;
   let chart;
@@ -64,6 +70,7 @@
       { name: "Fargate (On Demand)", cost: fargateCost },
       { name: "Fargate (Spot)", cost: fargateSpotCost },
       { name: "EC2 (On Demand, C5 Instances)", cost: ec2Cost },
+      { name: "EC2 (Spot, C5 Instances)", cost: ec2SpotCost },
     ];
 
     chart.data = {
@@ -116,6 +123,7 @@
     const fargateChartData = steps.map(s => ({ rps: rps * s, cost: estimateFargateCost(rps * s, mem, rpsCpu) }));
     const fargateSpotChartData = steps.map(s => ({ rps: rps * s, cost: estimateFargateSpotCost(rps * s, mem, rpsCpu) }));
     const ec2ChartData = steps.map(s => ({ rps: rps * s, cost: estimateEc2Cost(rps * s, rpsCpu) }));
+    const ec2SpotChartData = steps.map(s => ({ rps: rps * s, cost: estimateEc2SpotCost(rps * s, rpsCpu) }));
 
     scalingChart.data = {
       labels: lambdaChartData.map(row => row.rps),
@@ -138,6 +146,11 @@
           label: 'EC2 (On Demand, C5 Instances)',
           stepped: 'after',
           data: ec2ChartData.map(row => row.cost)
+        },
+        {
+          label: 'EC2 (Spot, C5 Instances)',
+          stepped: 'after',
+          data: ec2SpotChartData.map(row => row.cost)
         }
       ]
     };
@@ -147,7 +160,7 @@
 
 <h1>Compute Cost</h1>
 <p>This calculator is designed to help you evaluate the different options of compute in AWS. It demonstrates how each scales with cost and helps you find the point at which other deployment technologies may become more cost efficient.</p>
-<p><i>The tool is designed primarily for APIs. It assumes Linux x86 instances in London. Pricing correct at the time of writing (2025-12-02). Spot pricing is almost certainly different now. Check and double check your cost estimates with the AWS pricing calculator before you make decisions. Do not rely on this tool for accuracy. If you make bad decisions they're your fault not mine.</i></p>
+<p><i>The tool is designed primarily for APIs. It assumes Linux x86 instances in London. Pricing correct at the time of writing (December 2025). Spot pricing is almost certainly different now. Check and double check your cost estimates with the AWS pricing calculator before you make decisions. Do not rely on this tool for accuracy. If you make bad decisions they're your fault not mine.</i></p>
 
 <section>
   <h2>Parameters</h2>
