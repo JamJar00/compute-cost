@@ -221,6 +221,12 @@
   <div><canvas bind:this={scalingCanvas}></canvas></div>
 </section>
 
+<footer>
+  <hr />
+  <p>Made by <a href="https://jread.dev">Jamie Read</a></p>
+  <p><a href="https://github.com/JamJar00/compute-cost">GitHub</a></p>
+</footer>
+
 <style>
   .input-section {
     display: flex;
@@ -253,6 +259,11 @@
 
   h4 {
     margin-top: 0.25em;
+  }
+
+  footer {
+    margin-top: 2em;
+    text-align: center;
   }
 
   @media (max-width: 1200px) {
