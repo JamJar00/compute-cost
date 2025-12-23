@@ -257,6 +257,11 @@
     flex-grow: 1;
   }
 
+  canvas {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   h4 {
     margin-top: 0.25em;
   }
