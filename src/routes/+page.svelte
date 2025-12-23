@@ -228,6 +228,12 @@
 </footer>
 
 <style>
+  body {
+    font: 14px/1.5 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #727272;
+    font-weight: 400;
+  }
+
   .input-section {
     display: flex;
     gap: 1em;
@@ -264,6 +270,18 @@
 
   h4 {
     margin-top: 0.25em;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:link, a:visited, a:active {
+    color: #CE796B;
+  }
+
+  a:hover, a:focus {
+    color: #F6BE9A;
   }
 
   footer {
