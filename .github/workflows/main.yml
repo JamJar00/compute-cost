@@ -1,0 +1,51 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    container:
+      image: node:24-alpine
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: npm run prepare
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ui
+          path: dist
+          retention-days: 1
+
+  deploy-ui:
+    needs: build-ui
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ui
+          path: dist
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
