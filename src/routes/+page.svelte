@@ -1,35 +1,43 @@
 <script>
   import Chart from 'chart.js/auto';
+  import awsPrices from '$lib/aws-prices.json';
+
+  const lastFetchedDate = new Intl.DateTimeFormat('en-GB', {
+    dateStyle: 'long',
+    timeZone: 'UTC'
+  }).format(new Date(`${awsPrices.lastFetched}T00:00:00Z`));
 
   function estimateLambdaCost(rps, mem, time) {
     const gbSeconds = rps * (mem / 1024) * (time / 1000);
     const gbSecondsPerMonth = gbSeconds * 60 * 60 * 730;
-    const durationCost = Math.min(gbSecondsPerMonth, 6000000000) * 0.0000166667
-                          + Math.min(Math.max(0, gbSecondsPerMonth - 6000000000), 9000000000) * 0.000015
-                          + Math.max(0, gbSecondsPerMonth - 15000000000) * 0.0000133334;
+    const durationCost = awsPrices.lambda.gbSecondTiers.reduce((total, tier) => {
+      const tierLimit = tier.upTo ?? Infinity;
+      return total + Math.max(0, Math.min(gbSecondsPerMonth, tierLimit) - tier.from) * tier.rate;
+    }, 0);
 
     const requestsPerMonth = rps * 60 * 60 * 730;
-    const requestCost = requestsPerMonth / 1000000 * 0.20;
+    const requestCost = requestsPerMonth / 1000000 * awsPrices.lambda.requestPerMillion;
 
     return durationCost + requestCost;
   }
 
   function estimateFargateCost(rps, mem, rpsCpu) {
-    return (Math.ceil(mem / 1024) * 0.00511 + Math.ceil(rps / rpsCpu) * 0.04656) * 730;
+    return (Math.ceil(mem / 1024) * awsPrices.fargate.gbHour
+      + Math.ceil(rps / rpsCpu) * awsPrices.fargate.vcpuHour) * 730;
   }
 
   function estimateFargateSpotCost(rps, mem, rpsCpu) {
-    return (Math.ceil(mem / 1024) * 0.00167115 + Math.ceil(rps / rpsCpu) * 0.01521889) * 730;
+    return estimateFargateCost(rps, mem, rpsCpu) * awsPrices.fargate.spotDiscount;
   }
 
   function estimateEc2Cost(rps, rpsCpu) {
     // c5.large instances have two CPUs so we double rpsCpu
-    return Math.ceil(rps / (rpsCpu * 2)) * 0.101 * 730
+    return Math.ceil(rps / (rpsCpu * 2)) * awsPrices.ec2.c5LargeOnDemand * 730;
   }
 
   function estimateEc2SpotCost(rps, rpsCpu) {
     // c5.large instances have two CPUs so we double rpsCpu
-    return Math.ceil(rps / (rpsCpu * 2)) * 0.0276 * 730
+    return Math.ceil(rps / (rpsCpu * 2)) * awsPrices.ec2.c5LargeSpot * 730;
   }
 
   let rps = $state(10), mem = $state(1024), time = $state(100), rpsCpu = $state(10);
@@ -160,7 +168,7 @@
 
 <h1>Compute Cost</h1>
 <p>This calculator is designed to help you evaluate the different options of compute in AWS. It demonstrates how each scales with cost and helps you find the point at which other deployment technologies may become more cost efficient.</p>
-<p><i>The tool is designed primarily for APIs. It assumes Linux x86 instances in London. Pricing correct at the time of writing (December 2025). Spot pricing is almost certainly different now. Check and double check your cost estimates with the AWS pricing calculator before you make decisions. Do not rely on this tool for accuracy. If you make bad decisions they're your fault not mine.</i></p>
+<p><i>The tool is designed primarily for APIs. It assumes Linux x86 instances in London. AWS on-demand prices are fetched monthly. EC2 Spot uses AWS Spot Advisor savings and Fargate Spot uses an estimated discount, so Spot costs are indicative rather than live quotes. Prices last fetched {lastFetchedDate}. Check your cost estimates with the AWS pricing calculator before making decisions; this tool is not a guarantee of accuracy.</i></p>
 
 <section>
   <h2>Parameters</h2>

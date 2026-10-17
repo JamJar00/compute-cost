@@ -1,0 +1,33 @@
+{
+  "lastFetched": "2026-10-17",
+  "lambda": {
+    "gbSecondTiers": [
+      {
+        "from": 0,
+        "upTo": 6000000000,
+        "rate": 1.66667e-05
+      },
+      {
+        "from": 6000000000,
+        "upTo": 15000000000,
+        "rate": 1.5e-05
+      },
+      {
+        "from": 15000000000,
+        "upTo": null,
+        "rate": 1.33334e-05
+      }
+    ],
+    "requestPerMillion": 0.2
+  },
+  "fargate": {
+    "gbHour": 0.00511,
+    "vcpuHour": 0.04656,
+    "spotDiscount": 0.673
+  },
+  "ec2": {
+    "c5LargeOnDemand": 0.101,
+    "c5LargeSpotSavingsPercent": 65,
+    "c5LargeSpot": 0.03535
+  }
+}

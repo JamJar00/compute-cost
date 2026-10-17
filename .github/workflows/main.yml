@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows:
+      - Update AWS prices
+    types:
+      - completed
 
 concurrency:
   group: "pages"
@@ -11,6 +16,7 @@ concurrency:
 
 jobs:
   build-ui:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     container:
       image: node:24-alpine
